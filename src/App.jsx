@@ -116,12 +116,22 @@ const overviewSections = [
   {
     id: 'ipr',
     title: 'IPR Sector',
-    items: ['Team.xls', 'Team.xls', 'Team.xls', 'Team.xls'],
+    items: [
+      { docId: 'intent-team', name: 'Team pancard.pdf' },
+      { docId: 'intent-draft', name: 'Draftsofbank.pdf' },
+      { docId: 'invoice-jan', name: 'InvoiceJan.pdf' },
+      { docId: 'invoice-feb', name: 'InvoiceFeb.pdf' },
+    ],
   },
   {
     id: 'privacy',
     title: 'Privacy Sector',
-    items: ['Team.xls', 'Team.xls', 'Team.xls', 'Team.xls'],
+    items: [
+      { docId: 'email-policy', name: 'Companypolicy.pdf' },
+      { docId: 'email-nda', name: 'EmployeeNDA.pdf' },
+      { docId: 'draft-privacy', name: 'Privacydraft.pdf' },
+      { docId: 'draft-legal', name: 'Legalnotes.pdf' },
+    ],
   },
   {
     id: 'contracts',
@@ -252,7 +262,13 @@ const App = () => {
               onChange={handleSearchChange}
             />
             {query && (
-              <button className="clear-button" onClick={() => setQuery('')}>
+              <button
+                className="clear-button"
+                onClick={() => {
+                  setQuery('')
+                  setMode(lastMode)
+                }}
+              >
                 ✕
               </button>
             )}
@@ -266,7 +282,17 @@ const App = () => {
                   className="search-item"
                   onClick={() => setActiveDocId(doc.id)}
                 >
-                  <span className="search-item-icon">🔍</span>
+                  <span className="search-item-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                      <path
+                        d="M11 19a8 8 0 1 1 0-16 8 8 0 0 1 0 16zm7-1l-3.5-3.5"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  </span>
                   <span className="search-item-text">{doc.name}</span>
                 </button>
               ))}
@@ -381,9 +407,20 @@ const App = () => {
                   </div>
                   <div className="card-row">
                     {section.items.map((item, index) => (
-                      <div className="doc-card" key={`${section.id}-${index}`}>
+                      <button
+                        className="doc-card"
+                        key={`${section.id}-${index}`}
+                        onClick={() => {
+                          const doc = allDocs.find((d) => d.id === item.docId)
+                          if (doc) {
+                            setActiveDocId(doc.id)
+                            setActiveFolderId(doc.folderId)
+                            setMode('folder')
+                          }
+                        }}
+                      >
                         <div className="doc-head">
-                          <span className="doc-name">{item}</span>
+                          <span className="doc-name">{item.name}</span>
                           <span className="doc-menu">•••</span>
                         </div>
                         <div className="doc-body">
@@ -391,7 +428,7 @@ const App = () => {
                           <div className="doc-line short" />
                           <div className="doc-line" />
                         </div>
-                      </div>
+                      </button>
                     ))}
                     {!section.items.length && (
                       <div className="empty-note">No files added yet</div>
@@ -405,6 +442,26 @@ const App = () => {
           {(mode === 'folder' || mode === 'search') && activeDoc && (
             <div className="viewer">
               <div className="preview-card">
+                <div className="doc-toolbar">
+                  <span className="doc-toolbar-title">{activeDoc.name}</span>
+                  <button
+                    className="doc-action-btn"
+                    onClick={() => window.open(activeDoc.url, '_blank')}
+                    title="Open in new tab"
+                  >
+                    <svg viewBox="0 0 24 24" width="16" height="16">
+                      <path
+                        d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                    Open in new tab
+                  </button>
+                </div>
                 <iframe
                   className="doc-frame"
                   title={activeDoc.name}
